@@ -11,8 +11,11 @@ import { createAuthRouter } from './routes/authRoutes.js'
 import HealthService from './models/HealthService.js'
 import HealthcareFacility from './models/HealthcareFacility.js'
 import {facilityRoutes,serviceRoutes} from './routes/resourceRoutes.js'
+import Doctor from './models/Doctor.js'
+import DoctorSchedule from './models/DoctorSchedule.js'
+import { createDoctorRouters } from './routes/doctorRoutes.js'
 
-export function createApp({ registerAdditionalRoutes, userModel = User, healthServiceModel=HealthService, facilityModel=HealthcareFacility } = {}) {
+export function createApp({ registerAdditionalRoutes, userModel = User, healthServiceModel=HealthService, facilityModel=HealthcareFacility, doctorModel=Doctor, scheduleModel=DoctorSchedule } = {}) {
   const config = getConfig()
   const app = express()
   app.disable('x-powered-by')
@@ -24,6 +27,9 @@ export function createApp({ registerAdditionalRoutes, userModel = User, healthSe
   app.use('/api/v1/auth', createAuthRouter(userModel))
   app.use('/api/v1/health-services',serviceRoutes(healthServiceModel,userModel))
   app.use('/api/v1/facilities',facilityRoutes(facilityModel,healthServiceModel,userModel))
+  const { doctorRouter, scheduleRouter } = createDoctorRouters({ DoctorModel: doctorModel, ScheduleModel: scheduleModel, FacilityModel: facilityModel, HealthServiceModel: healthServiceModel, UserModel: userModel })
+  app.use('/api/v1/doctors', doctorRouter)
+  app.use('/api/v1/schedules', scheduleRouter)
   registerAdditionalRoutes?.(app)
   app.use(notFound)
   app.use(errorHandler)

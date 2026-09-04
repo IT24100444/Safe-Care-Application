@@ -1,0 +1,3 @@
+import {connectDatabase,disconnectDatabase} from '../src/config/database.js';import {getConfig} from '../src/config/env.js';import User from '../src/models/User.js';import {provisionDoctorUser} from '../src/services/doctorProvisioningService.js'
+async function run(){const{mongoUri}=getConfig({requireDatabase:true});await connectDatabase(mongoUri);await provisionDoctorUser(User,{name:process.env.DOCTOR_NAME,email:process.env.DOCTOR_EMAIL,password:process.env.DOCTOR_PASSWORD});console.info('Doctor account created successfully')}
+run().catch(error=>{console.error(`Doctor provisioning failed: ${error.message}`);process.exitCode=1}).finally(disconnectDatabase)

@@ -11,3 +11,7 @@ Python: `cd python-service/fastapi-service`, run `python3 -m venv .venv`, `sourc
 Never commit `.env`; service-specific `.env.example` files document supported values.
 
 For development ADMIN provisioning, set `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` in the process environment and run `node scripts/createAdmin.js` from `backend/node-api`. The password must follow the same 8–128 character letter-and-number policy. The script requires Atlas connectivity, rejects duplicates, hashes the password, closes the connection, and never prints credentials. Do not add these values to source control.
+
+For DOCTOR provisioning, set `DOCTOR_NAME`, `DOCTOR_EMAIL`, and `DOCTOR_PASSWORD`, then run `npm run create:doctor` from `backend/node-api`. The script applies the same password policy, hashes with bcrypt cost 12, rejects duplicate email, prints no credentials, and always closes the database connection. It creates only the User; use the ADMIN doctor screen to create or link the professional profile. There is no public DOCTOR registration endpoint.
+
+Doctor schedule dates are interpreted as Asia/Colombo calendar dates and times use `HH:mm`. ADMIN manages schedule changes. DOCTOR self pages are read-only. Computed availability is not bookable until the appointment feature is implemented.

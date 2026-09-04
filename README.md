@@ -45,11 +45,11 @@ uvicorn app.main:app --reload --port 8000
 
 Quality commands: `npm test`, `npm run lint`, and `npm run build` in the relevant JavaScript service; `pytest` and `ruff check .` in the activated Python environment.
 
-Current Node endpoints are `GET /api/v1/health`, `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, and authenticated `GET /api/v1/auth/me`. Run Node auth tests with `npm test`. No development administrator seed is included; create privileged identities only through a controlled database/seed workflow using environment-supplied credentials in a later task.
+Current Node APIs cover health, authentication, health services, facilities, doctors, schedules, and computed doctor availability. Run Node tests with `npm test`.
 
 The browser stores only the access token in localStorage and sends it as a Bearer token. This is pragmatic for the hackathon but exposes the token if an XSS vulnerability exists. JWT logout is client-side, tokens are not revoked, and login rate limiting is a future security improvement. Backend authorization always uses the database-loaded user—not browser role state.
 
-There are no facilities, appointments, recommendations, chatbots, or AI capabilities yet. `fourth.json` is intentionally empty because the fourth product language remains pending confirmation and is not exposed in the selector.
+There are no appointments, recommendations, chatbots, or AI capabilities. `fourth.json` is intentionally empty because the fourth product language remains pending confirmation and is not exposed in the selector.
 
 See [development setup](docs/development-setup.md) for details.
 
@@ -59,4 +59,8 @@ Public users can browse active health services and search active facilities by d
 
 ADMIN users can create, edit, and deactivate facilities and health services through protected API and UI routes. Deactivation is one-way in the current MVP and does not physically delete records. Historical facility references to deactivated services remain stored, but public responses omit those inactive services. PATIENT and DOCTOR accounts cannot mutate this data.
 
-To provision an administrator, configure `MONGODB_URI`, `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`, then run `node scripts/createAdmin.js` from `backend/node-api`. Credentials are read only from the environment; there is no public admin-registration endpoint. Live CRUD requires MongoDB Atlas configuration. Doctor, schedule, availability, and appointment features do not yet exist.
+To provision an administrator, configure `MONGODB_URI`, `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`, then run `node scripts/createAdmin.js` from `backend/node-api`. To provision a DOCTOR login, use `DOCTOR_NAME`, `DOCTOR_EMAIL`, and `DOCTOR_PASSWORD` with `npm run create:doctor`; an ADMIN then links that User ObjectId in `/admin/doctors`. Credentials are environment-only and neither privileged role has a public registration route.
+
+## Doctor schedules and configured availability
+
+Public users can search active doctors by specialization, facility, health service, language, and escaped name text, view safe profile details, select a date, and view configured schedule slots. Slots are calculated from active schedules; they are not reservations and booking begins in Part 5. ADMIN manages doctor profiles, assignments, links, and schedules. DOCTOR accounts have read-only self-profile and self-schedule pages resolved from the authenticated user. Schedule dates and `HH:mm` times use the `Asia/Colombo` calendar convention; durations are 15, 20, 30, 45, or 60 minutes.
