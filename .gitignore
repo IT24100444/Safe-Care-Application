@@ -13,5 +13,6 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 *.log
+npm-debug.log*
 .idea/
 .vscode/
