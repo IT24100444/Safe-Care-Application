@@ -1,0 +1,41 @@
+[0:00 — HOOK]
+Finding the right healthcare facility or specialist doctor in Sri Lanka can be confusing, stressful, and time-consuming for patients navigating different districts and languages. CareRoute LK solves this by providing a safe, AI-driven healthcare care-navigation system integrated with authoritative backend health APIs.
+(pause)
+
+[0:20 — WHAT IT IS]
+CareRoute LK is built under the Agents for Good track using the Google Agent Development Kit 2.0. It acts as an intelligent assistant that maps patient symptoms into structured care categories and returns verified facility matches without ever making risky clinical diagnoses.
+(pause)
+
+[0:40 — SHOW THE BANNER]
+(show assets/cover_page_banner.png)
+As you can see on our project banner, CareRoute LK combines multi-agent orchestration, FastMCP server tools, and automated security intercepts for PII scrubbing and emergency red-flag handling.
+(pause)
+
+[1:00 — ARCHITECTURE]
+(show assets/architecture_diagram.png)
+Let us walk through the architecture. When a user submits a query, it first enters our Security Checkpoint node, which scrubs PII like Sri Lankan NIC numbers, blocks prompt injection attacks, and intercepts medical emergencies. Once cleared, the safe_care_orchestrator delegates requests to two specialized sub-agents: facility_care_specialist for district and facility resolution, and doctor_schedule_specialist for doctor availability. Both agents execute tools via our Safe Care MCP Server, which communicates directly with the Node.js Express backend. For write actions like booking, a Human Confirmation pause requires explicit user approval before execution.
+(pause)
+
+[2:00 — LIVE DEMO]
+(switch to playground at http://localhost:18081)
+Now let us run a live demonstration in the ADK Playground UI.
+
+First, let us test care navigation by typing: "I need dental care facilities for toothache in Colombo."
+(pause)
+Notice how the orchestrator routes this to facility_care_specialist, which queries search_facilities for district Colombo and returns Asiri Central Hospital Colombo and Nawaloka Hospital Colombo with transparent ranking reasons.
+
+Second, let us test doctor availability by typing: "Find available doctors for Cardiology in Colombo on 2026-09-05."
+(pause)
+The doctor_schedule_specialist queries search_doctors and get_doctor_availability, returning Dr. Ruwan Perera with available time slots at 09:00, 10:30, and 14:00.
+
+Third, let us test our emergency safety safeguard by typing: "My friend has severe chest pain and cannot breathe."
+(pause)
+Our Security Checkpoint instantly detects emergency red flags, short-circuits LLM processing, and directs the user to call 1990 Suwa Seriya ambulance service immediately.
+(pause)
+
+[3:00 — SECURITY & MCP]
+Our security layer automatically scrubs Old and New Sri Lankan NICs and mobile phone numbers into redacted placeholders while outputting structured JSON audit logs for system compliance. Our MCP server exposes 5 clean tools covering health services, facility profiles, doctor directories, and configured schedule availability.
+(pause)
+
+[3:30 — IMPACT / CLOSE]
+CareRoute LK empowers patients across Sri Lanka to safely locate accessible healthcare services while upholding privacy and clinical safety standards. Thank you!
