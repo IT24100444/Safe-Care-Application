@@ -1,4 +1,4 @@
-# CareRoute LK
+# Safe Care Application 
 
 CareRoute LK is a multilingual healthcare navigation and appointment platform for Sri Lanka. The current application provides the project foundation and JWT authentication for PATIENT, DOCTOR, and ADMIN identities. Public registration always creates PATIENT accounts; DOCTOR and ADMIN identities must be provisioned outside public endpoints.
 
