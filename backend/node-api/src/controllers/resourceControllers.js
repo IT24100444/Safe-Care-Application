@@ -1,0 +1,2 @@
+import {sendSuccess} from '../utils/apiResponse.js'
+export const controller=s=>({create:async(req,res)=>sendSuccess(res,await s.create(req.body),201),list:async(req,res)=>{const items=await s.list(req.query);return sendSuccess(res,{items,count:items.length})},get:async(req,res)=>sendSuccess(res,await s.get(req.params.id)),update:async(req,res)=>sendSuccess(res,await s.update(req.params.id,req.body)),deactivate:async(req,res)=>sendSuccess(res,await s.deactivate(req.params.id))})

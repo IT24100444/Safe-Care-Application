@@ -1,0 +1,16 @@
+import { Route, Routes } from 'react-router-dom'
+import ProtectedRoute from './components/auth/ProtectedRoute.jsx'
+import RoleRoute from './components/auth/RoleRoute.jsx'
+import AppLayout from './layouts/AppLayout.jsx'
+import AdminFacilitiesPage from './pages/AdminFacilitiesPage.jsx'
+import AdminServicesPage from './pages/AdminServicesPage.jsx'
+import FacilitiesPage from './pages/FacilitiesPage.jsx'
+import FacilityDetailsPage from './pages/FacilityDetailsPage.jsx'
+import HomePage from './pages/HomePage.jsx'
+import LoginPage from './pages/LoginPage.jsx'
+import NotFoundPage from './pages/NotFoundPage.jsx'
+import ProfilePage from './pages/ProfilePage.jsx'
+import RegisterPage from './pages/RegisterPage.jsx'
+import ServicesPage from './pages/ServicesPage.jsx'
+
+export default function App() { return <Routes><Route element={<AppLayout />}><Route index element={<HomePage />} /><Route path="facilities" element={<FacilitiesPage />} /><Route path="facilities/:id" element={<FacilityDetailsPage />} /><Route path="services" element={<ServicesPage />} /><Route path="login" element={<LoginPage />} /><Route path="register" element={<RegisterPage />} /><Route element={<ProtectedRoute />}><Route path="profile" element={<ProfilePage />} /><Route element={<RoleRoute allowedRoles={['ADMIN']} />}><Route path="admin/facilities" element={<AdminFacilitiesPage />} /><Route path="admin/services" element={<AdminServicesPage />} /></Route></Route><Route path="*" element={<NotFoundPage />} /></Route></Routes> }

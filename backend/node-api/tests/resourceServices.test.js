@@ -1,0 +1,27 @@
+import { facilityService, healthServiceService } from '../src/services/resourceServices.js'
+
+const id = (n) => n.toString(16).padStart(24, '0')
+const serviceDoc = (n, active = true) => ({ _id: id(n), name: `Test Service ${n}`, category: 'General', description: '', isActive: active })
+const facilityDoc = (services = [serviceDoc(1)]) => ({ _id: id(20), name: 'Test Central Hospital', facilityType: 'HOSPITAL', district: 'Colombo', address: 'Test address', supportedLanguages: ['en'], healthServices: services, emergencyAvailable: true, description: '', isActive: true })
+const populated = (value) => ({ populate: async () => value })
+
+describe('HealthService service', () => {
+  test('creates and safely serializes a service', async () => { const service = healthServiceService({ create: async (data) => ({ _id: id(1), ...data }) }); expect(await service.create({ name: 'General Medicine', category: 'General' })).toMatchObject({ id: id(1), name: 'General Medicine', isActive: true }) })
+  test('lists only with an active allowlisted query and escapes regex', async () => { let filter; const service = healthServiceService({ find: async (value) => { filter = value; return [] } }); await service.list({ search: 'eye.*', ignored: { $ne: 1 } }); expect(filter).toEqual({ isActive: true, name: { $regex: 'eye\\.\\*', $options: 'i' } }) })
+  test('returns active detail and controlled missing response', async () => { const model = { findOne: async () => serviceDoc(1) }; expect((await healthServiceService(model).get(id(1))).id).toBe(id(1)); model.findOne = async () => null; await expect(healthServiceService(model).get(id(2))).rejects.toMatchObject({ statusCode: 404 }) })
+  test('rejects malformed IDs', async () => { await expect(healthServiceService({}).get('bad')).rejects.toMatchObject({ statusCode: 400, code: 'INVALID_ID' }) })
+  test('updates active services', async () => { const model = { findOneAndUpdate: async () => ({ ...serviceDoc(1), name: 'Updated' }) }; expect((await healthServiceService(model).update(id(1), { name: 'Updated' })).name).toBe('Updated') })
+  test('deactivation is one-way', async () => { let first = true; const model = { findOneAndUpdate: async () => first ? (first = false, serviceDoc(1, false)) : null }; expect((await healthServiceService(model).deactivate(id(1))).isActive).toBe(false); await expect(healthServiceService(model).deactivate(id(1))).rejects.toMatchObject({ statusCode: 404 }) })
+  test('maps duplicate database errors safely', async () => { const model = { create: async () => { const error = new Error('raw mongo detail'); error.code = 11000; throw error } }; await expect(healthServiceService(model).create({})).rejects.toMatchObject({ statusCode: 409, code: 'DUPLICATE_SERVICE' }) })
+})
+
+describe('HealthcareFacility service', () => {
+  test('creates with active service references and deduplicates languages', async () => { const model = { create: async (data) => ({ ...facilityDoc(), ...data }) }; const services = { countDocuments: async () => 1 }; const result = await facilityService(model, services).create({ ...facilityDoc(), healthServices: [id(1)], supportedLanguages: ['en', 'en'] }); expect(result.supportedLanguages).toEqual(['en']) })
+  test.each([[0, 'nonexistent'], [0, 'inactive']])('rejects %s service reference (%s)', async (count) => { const service = facilityService({}, { countDocuments: async () => count }); await expect(service.create({ ...facilityDoc(), healthServices: [id(1)] })).rejects.toMatchObject({ statusCode: 422 }) })
+  test('rejects malformed service references', async () => { await expect(facilityService({}, {}).create({ ...facilityDoc(), healthServices: ['bad'] })).rejects.toMatchObject({ statusCode: 400 }) })
+  test('filters inactive populated services from public list', async () => { const model = { find: () => populated([facilityDoc([serviceDoc(1), serviceDoc(2, false)])]) }; const result = await facilityService(model, {}).list({}); expect(result[0].healthServices).toEqual([{ id: id(1), name: 'Test Service 1', category: 'General' }]) })
+  test('filters inactive populated services from public detail', async () => { const model = { findOne: () => populated(facilityDoc([serviceDoc(1, false)])) }; expect((await facilityService(model, {}).get(id(20))).healthServices).toEqual([]) })
+  test('handles missing and malformed details safely', async () => { await expect(facilityService({}, {}).get('bad')).rejects.toMatchObject({ statusCode: 400 }); const model = { findOne: () => populated(null) }; await expect(facilityService(model, {}).get(id(20))).rejects.toMatchObject({ statusCode: 404 }) })
+  test.each([{ district: 'Colombo' }, { facilityType: 'HOSPITAL' }, { language: 'ta' }, { healthService: id(1) }, { emergencyAvailable: 'true' }, { emergencyAvailable: 'false' }, { district: 'Colombo', healthService: id(1), language: 'en' }])('builds allowlisted filter %#', async (query) => { let filter; const model = { find: (value) => { filter = value; return populated([]) } }; await facilityService(model, {}).list(query); expect(filter).toMatchObject({ isActive: true }) })
+  test('updates and deactivates active facilities', async () => { const model = { findOneAndUpdate: async (filter, update) => ({ ...facilityDoc(), ...update }) }; const service = facilityService(model, { countDocuments: async () => 1 }); expect((await service.update(id(20), { district: 'Kandy' })).district).toBe('Kandy'); expect((await service.deactivate(id(20))).isActive).toBe(false) })
+})

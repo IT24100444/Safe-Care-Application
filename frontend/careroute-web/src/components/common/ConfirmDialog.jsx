@@ -1,0 +1,3 @@
+import PropTypes from 'prop-types'
+export default function ConfirmDialog({ title, description, onCancel, onConfirm }) { return <div className="dialog-backdrop" role="presentation"><section className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-description"><h2 id="confirm-title">{title}</h2><p id="confirm-description">{description}</p><div><button type="button" onClick={onCancel}>Cancel</button><button type="button" className="danger" onClick={onConfirm}>Deactivate</button></div></section></div> }
+ConfirmDialog.propTypes = { title: PropTypes.string.isRequired, description: PropTypes.string.isRequired, onCancel: PropTypes.func.isRequired, onConfirm: PropTypes.func.isRequired }
