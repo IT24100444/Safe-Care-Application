@@ -9,8 +9,8 @@ import { scheduleService } from '../services/scheduleService.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { doctorAvailabilityValidator, doctorCreateValidator, doctorFilterValidator, doctorIdValidator, doctorUpdateValidator, scheduleCreateValidator, scheduleFilterValidator, scheduleIdValidator, scheduleUpdateValidator } from '../validators/doctorValidators.js'
 
-export function createDoctorRouters({ DoctorModel, ScheduleModel, FacilityModel, HealthServiceModel, UserModel }) {
-  const doctors = doctorService(DoctorModel, FacilityModel, HealthServiceModel, UserModel); const schedules = scheduleService(ScheduleModel, DoctorModel, FacilityModel)
+export function createDoctorRouters({ DoctorModel, ScheduleModel, FacilityModel, HealthServiceModel, UserModel, AppointmentModel }) {
+  const doctors = doctorService(DoctorModel, FacilityModel, HealthServiceModel, UserModel); const schedules = scheduleService(ScheduleModel, DoctorModel, FacilityModel, AppointmentModel)
   const doctorHandlers = doctorController(doctors); const scheduleHandlers = scheduleController(schedules, doctors)
   const admin = [authenticate(UserModel), authorizeRoles(ROLES.ADMIN)]; const doctorOnly = [authenticate(UserModel), authorizeRoles(ROLES.DOCTOR)]
   const doctorRouter = Router()
